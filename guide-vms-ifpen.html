@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide VMS — IFPEN</title>
+<style>
+  :root{
+    --navy:#14304c;
+    --navy-deep:#0d2033;
+    --sage:#9ec17a;
+    --sage-dark:#749352;
+    --cream:#eee7d6;
+    --page-bg:#f6f4ee;
+    --card-bg:#ffffff;
+    --text:#14304c;
+    --text-soft:#5c6b78;
+    --amber:#e2a13c;
+    --radius:22px;
+    --shadow:0 12px 30px -14px rgba(20,48,76,0.25);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:var(--font);
+    background:var(--page-bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+  }
+  .guide{
+    max-width:760px;
+    margin:0 auto;
+    padding:22px 16px 70px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+
+  /* shared card shell */
+  .card{
+    position:relative;
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:44px 26px 50px;
+  }
+  #cat-atex,#cat-chimie,#cat-electrique,#cat-esp,#cat-incendie,#cat-manutention{background:rgba(158,193,122,.10);border:2px solid rgba(116,147,82,.45);}
+  #cat-atex .badge,#cat-chimie .badge,#cat-electrique .badge,#cat-esp .badge,#cat-incendie .badge,#cat-manutention .badge{background:var(--sage);color:#fff;border-radius:999px;}
+  .card--navy{
+    background:#1b4168;
+    color:#fff;
+  }
+  .corner{position:absolute;width:20px;height:20px;pointer-events:none;}
+  .corner-tl{top:16px;left:16px;border-top:3px solid var(--sage);border-left:3px solid var(--sage);border-radius:6px 0 0 0;}
+  .corner-tr{top:16px;right:16px;border-top:3px solid var(--sage);border-right:3px solid var(--sage);border-radius:0 6px 0 0;}
+  .corner-bl{bottom:16px;left:16px;border-bottom:3px solid var(--sage);border-left:3px solid var(--sage);border-radius:0 0 0 6px;}
+  .corner-br{bottom:16px;right:16px;border-bottom:3px solid var(--sage);border-right:3px solid var(--sage);border-radius:0 0 6px 0;}
+
+  /* hero */
+  .hero{overflow:hidden;background:#1b4168;}
+  .hero .wordmark{display:flex;align-items:center;margin-bottom:22px;}
+  .hero .logo{display:block;width:152px;height:92px;object-fit:cover;object-position:center;border-radius:0;}
+  .hero-title{font-size:clamp(38px,8vw,54px);font-weight:900;letter-spacing:.5px;margin:0;display:inline-block;}
+  .hero-title::after{content:'';display:block;width:60px;height:4px;background:var(--sage);margin-top:10px;border-radius:2px;}
+  .hero-subtitle{font-size:clamp(21px,4.5vw,27px);font-weight:700;line-height:1.35;margin:12px 0 46px;}
+  .hero-subtitle .hl{background:var(--sage);color:#fff;padding:2px 10px;border-radius:7px;display:inline-block;}
+  .hero-concepts{display:flex;flex-wrap:wrap;gap:26px 40px;}
+  .concept{display:flex;align-items:center;gap:10px;}
+  .concept svg{width:22px;height:22px;stroke:var(--sage);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+  .bracket-label{position:relative;padding:6px 3px;font-weight:700;font-size:16px;}
+  .bracket-label::before,.bracket-label::after{content:'';position:absolute;width:9px;height:9px;}
+  .bracket-label::before{top:-5px;left:-7px;border-top:2px solid var(--sage);border-left:2px solid var(--sage);}
+  .bracket-label::after{bottom:-5px;right:-7px;border-bottom:2px solid var(--sage);border-right:2px solid var(--sage);}
+
+  /* objectif card */
+  .obj-title{color:#fff;font-weight:800;font-size:21px;letter-spacing:.5px;margin:0 0 14px;}
+  .card--navy p{font-size:15.5px;line-height:1.6;margin:0;}
+  .hero .hero-subtitle{margin:12px 0 32px;}
+  .obj-list{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-direction:column;gap:11px;font-size:15.5px;}
+  .obj-list li::before{content:'—';margin-right:9px;color:var(--sage);font-weight:700;}
+  .hl-word{text-decoration:underline;text-decoration-color:#fff;text-decoration-thickness:2px;text-underline-offset:3px;font-weight:600;}
+
+  /* usage note */
+  .usage-note{text-align:center;font-size:14px;color:var(--text-soft);padding:0 12px;line-height:1.5;}
+  .usage-note strong{color:var(--navy);}
+
+  /* toolbar */
+  .search-wrap{
+    position:sticky;top:0;z-index:20;
+    background:var(--page-bg);
+    padding:12px 0 10px;
+  }
+  .toolbar-wrap{
+    background:var(--page-bg);
+    padding:0 0 14px;
+  }
+  .search-input{
+    width:100%;padding:12px 16px;border-radius:14px;
+    border:1.5px solid rgba(20,48,76,.15);
+    font-size:15px;font-family:inherit;color:var(--navy);
+    background:#fff;margin-bottom:10px;
+  }
+  .search-input:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px rgba(158,193,122,.3);}
+  .chip-nav{display:flex;flex-wrap:wrap;gap:8px;overflow:visible;padding-bottom:2px;}
+  .chip-nav{scrollbar-width:none;-ms-overflow-style:none;}
+  .chip-nav::-webkit-scrollbar{display:none;}
+  .chip{
+    flex-shrink:0;background:var(--cream);color:var(--navy);
+    border-radius:999px;padding:8px 16px;font-size:13.5px;font-weight:600;
+    white-space:nowrap;text-decoration:none;
+  }
+  .chip:hover{background:var(--sage);color:#fff;}
+  .no-results{display:none;text-align:center;color:var(--text-soft);font-size:14px;padding:20px 0;}
+
+  /* category cards */
+  .card-head{text-align:center;margin-bottom:30px;}
+  .badge{
+    display:inline-block;background:var(--cream);color:var(--navy);
+    font-weight:700;font-size:15px;padding:9px 22px;border-radius:999px;
+    line-height:1.3;
+  }
+  .question-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:17px;}
+  .question-list li{display:flex;gap:0;align-items:flex-start;line-height:1.55;font-size:15.5px;}
+  .q-letter{
+    flex-shrink:0;color:var(--sage);font-weight:700;font-size:15.5px;text-transform:uppercase;
+    display:inline-block;margin-top:0;
+  }
+  .q-letter::before{content:'•';font-size:15.5px;margin-right:6px;}
+  .card-number{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:var(--sage-dark);font-weight:700;font-size:13px;}
+
+  .hazard-row{display:flex;gap:12px;justify-content:center;margin:0 0 28px;flex-wrap:wrap;}
+  .hazard{width:64px;height:64px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .hazard img{width:100%;height:100%;object-fit:contain;}
+
+  footer{text-align:center;color:var(--text-soft);font-size:13px;padding-top:6px;}
+
+  @media (max-width:480px){
+    .card{padding:36px 20px 44px;}
+    .hero-concepts{gap:20px 28px;}
+    .hero .logo{width:128px;height:76px;}
+  }
+
+  @media print{
+    body{background:#fff;}
+    .toolbar-wrap{display:none;}
+    .card{box-shadow:none;border:1px solid #d8d8d8;break-inside:avoid;}
+    .card--navy{background:#fff !important;color:var(--navy) !important;border:2px solid var(--navy);}
+    .hl-word,.obj-title{color:var(--navy) !important;}
+    .hero-subtitle .hl{background:none;color:var(--navy);}
+  }
+</style>
+</head>
+<body>
+<div class="guide">
+
+  <!-- COVER -->
+  <header class="card card--navy hero">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="wordmark">
+      <img class="logo" src="OIP-logo-blanc.png" alt="IFP Energies nouvelles">
+    </div>
+    <h1 class="hero-title">GUIDE</h1>
+    <p class="hero-subtitle">Visite Managériale de<br><span class="hl">Sécurité</span></p>
+    <div class="hero-concepts">
+      <div class="concept">
+        <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><line x1="14.5" y1="14.5" x2="20" y2="20"/></svg>
+        <span class="bracket-label">Observer</span>
+      </div>
+      <div class="concept">
+        <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.5-5.6"/><polyline points="17 2.5 17.7 6.3 13.9 6.5"/><path d="M20 12a8 8 0 0 1-13.5 5.6"/><polyline points="7 21.5 6.3 17.7 10.1 17.5"/></svg>
+        <span class="bracket-label">Échanger</span>
+      </div>
+      <div class="concept">
+        <svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3Z"/></svg>
+        <span class="bracket-label">Comprendre</span>
+      </div>
+      <div class="concept">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        <span class="bracket-label">Agir</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- OBJECTIF -->
+  <section class="card card--navy" id="objectif">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <h2 class="obj-title">OBJECTIF</h2>
+    <p>La <strong>VMS</strong> est un moment d'échange privilégié entre le manager et les collaborateurs, elle permet de :</p>
+    <ul class="obj-list">
+      <li><strong>Observer</strong> les <span class="hl-word">activités</span>,</li>
+      <li><strong>Comprendre</strong> les situations de <span class="hl-word">travail</span>,</li>
+      <li><strong>Identifier</strong> les <span class="hl-word">risques</span>,</li>
+      <li><strong>Définir</strong> des pistes d'amélioration afin de renforcer la culture <span class="hl-word">sécurité</span>.</li>
+    </ul>
+  </section>
+
+  <p class="usage-note"><strong>Comment utiliser ce guide —</strong> parcourez les thématiques ci-dessous et choisissez les questions selon la situation observée.</p>
+
+  <!-- TOOLBAR -->
+  <div class="search-wrap">
+    <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une question (ex. ATEX, EPI, incendie...)">
+  </div>
+  <div class="toolbar-wrap">
+    <nav class="chip-nav">
+      <a class="chip" href="#cat-poste">Poste</a>
+      <a class="chip" href="#cat-risques">Risques</a>
+      <a class="chip" href="#cat-atex">ATEX</a>
+      <a class="chip" href="#cat-chimie">Chimie</a>
+      <a class="chip" href="#cat-electrique">Électrique</a>
+      <a class="chip" href="#cat-esp">ESP</a>
+      <a class="chip" href="#cat-incendie">Incendie</a>
+      <a class="chip" href="#cat-manutention">Manutention</a>
+      <a class="chip" href="#cat-procedures">Procédures</a>
+      <a class="chip" href="#cat-epcepi">EPC / EPI</a>
+      <a class="chip" href="#cat-ergonomie">Ergonomie</a>
+      <a class="chip" href="#cat-urgence">Urgence</a>
+    </nav>
+  </div>
+  <p class="no-results" id="noResults">Aucune question ne correspond à cette recherche.</p>
+
+  <!-- 1 - DESCRIPTION DU POSTE -->
+  <article class="card category-card" id="cat-poste">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Description du poste ou de la tâche</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">P</span><span>ouvez-vous décrire les différentes étapes de la manipulation ?</span></li>
+      <li><span class="q-letter">Q</span><span>uelle est la durée habituelle de cette manipulation et combien de personnes y participent ?</span></li>
+      <li><span class="q-letter">Q</span><span>uelles sont les situations où vous manipulez bien que toutes les conditions de sécurité ne soient pas entièrement remplies ?</span></li>
+      <li><span class="q-letter">C</span><span>omment savez-vous que l'équipement fonctionne correctement et quels points vérifiez-vous avant de commencer ?</span></li>
+      <li><span class="q-letter">S</span><span>i votre équipement fonctionne HHO, quelles sont les consignes spécifiques ?</span></li>
+    </ul>
+    <div class="card-number">1</div>
+  </article>
+
+  <!-- 9 - PROCÉDURES ET FORMATIONS -->
+  <article class="card category-card" id="cat-procedures">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Procédures et formations</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">O</span><span>ù sont consignées vos procédures opératoires, incluant les consignes de sécurité de l'installation ? (P. ex. : consulter le document et la date de dernière mise à jour &lt;1 an, présence des PID, etc.)</span></li>
+      <li><span class="q-letter">C</span><span>omment avez-vous été formé à cette activité et quelles habilitations détenez-vous ? (P. ex. : le document validant ou attestant la formation, etc.)</span></li>
+      <li><span class="q-letter">Q</span><span>uelles formations seraient utiles pour améliorer votre sécurité ?</span></li>
+    </ul>
+    <div class="card-number">2</div>
+  </article>
+
+  <!-- 2 - RISQUES IDENTIFIÉS -->
+  <article class="card category-card" id="cat-risques">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Risques identifiés</span></div>
+    <div class="hazard-row">
+      <div class="hazard"><img src="pictogrammes/RISQUE ATEX-jaune.png" alt="Risque ATEX"></div>
+      <div class="hazard"><img src="pictogrammes/Risque toxique-jaune.png" alt="Risque toxique"></div>
+      <div class="hazard"><img src="pictogrammes/Risque électrique -jaune.png" alt="Risque électrique"></div>
+      <div class="hazard"><img src="pictogrammes/ESP_CORRECT-removebg-preview-jaune.png" alt="Risque lié aux équipements sous pression"></div>
+      <div class="hazard"><img src="pictogrammes/Risque inflammable-jaune.png" alt="Risque inflammable"></div>
+      <div class="hazard"><img src="pictogrammes/charge_lourdes-removebg-preview-jaune.png" alt="Risque lié aux charges lourdes"></div>
+    </div>
+    <ul class="question-list">
+      <li><span class="q-letter">Q</span><span>uels sont les principaux risques sur ce poste et comment sont-ils maîtrisés ?</span></li>
+      <li><span class="q-letter">D</span><span>ans quelles situations le risque devient-il plus élevé que d'habitude ?</span></li>
+      <li><span class="q-letter">Q</span><span>uels incidents ou presque-accidents ont eu lieu, et quelles actions ont été mises en place à la suite de ces événements ?</span></li>
+      <li><span class="q-letter">Q</span><span>uels sont les dysfonctionnements présents sur votre installation ? (P. ex. : point de purge non bouchonné, fuite ou écoulement)</span></li>
+    </ul>
+    <div class="card-number">3</div>
+  </article>
+
+  <!-- 3 - ATEX -->
+  <article class="card category-card" id="cat-atex">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">ATEX (atmosphères explosives)</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">C</span><span>omment maitrisez-vous les risques d'ignition ? (P. ex. : mise à la terre par connexion d'un fût avec une pince lors d'un remplissage, calorifugeage des équipements chauds)</span></li>
+      <li><span class="q-letter">L</span><span>orsque vous êtes dans un local d'essai ou une zone ATEX, quels sont vos réflexes vis-à-vis des équipements non-ATEX que vous portez avec vous ? (P. ex. : éteindre et ranger téléphone/ordinateur portable, ne pas utiliser d'outils électroportatifs, etc.)</span></li>
+      <li><span class="q-letter">A</span><span>vez-vous des zones confinées dans votre installation dans lesquelles une atmosphère ATEX peut se former (en l'absence de ventilation ou de détection) ? (P. ex. : armoire non ventilée contenant un chromatographe)</span></li>
+      <li><span class="q-letter">L</span><span>es équipements que vous utilisez en zone ATEX sont-ils tous compatibles avec ce risque ? (P. ex. : clé anti-étincelle pour ouvrir des fûts)</span></li>
+    </ul>
+    <div class="card-number">4</div>
+  </article>
+
+  <!-- 4 - PRODUITS CHIMIQUES -->
+  <article class="card category-card" id="cat-chimie">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Expositions aux produits chimiques</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">C</span><span>omment identifiez-vous les dangers liés aux produits que vous utilisez et où trouvez-vous ces informations ? (P. ex. : étiquettes, FDS (fiche de données de sécurité))</span></li>
+      <li><span class="q-letter">C</span><span>omment les produits sont-ils stockés, étiquetés et inventoriés dans le laboratoire ? (P. ex. : règles de comptabilité des produits chimiques lors du stockage)</span></li>
+      <li><span class="q-letter">C</span><span>omment gérez-vous vos déchets chimiques ? (P. ex. : tri des déchets incompatibles, fermeture des bidons de déchets, bidons sur rétention)</span></li>
+      <li><span class="q-letter">Q</span><span>uels produits présentant un danger pour la santé manipulez-vous ? Quels sont ces dangers ?</span></li>
+      <li><span class="q-letter">C</span><span>omment vous protégez-vous des risques liés à ces produits ? (P. ex. : EPI, procédures, ventilation, récipient fermé systématiquement, etc.)</span></li>
+      <li><span class="q-letter">Q</span><span>uels sont vos réflexes en cas de déversement ou de projection de produits dangereux ? (P. ex. : récipient sur rétention, localisation de la douche de sécurité ou rince-œil, etc.)</span></li>
+      <li><span class="q-letter">Q</span><span>uelle signalétique est présente sur l'installation ? (P. ex. : étiquetage des vannes, sens de circulation et noms des fluides sur les canalisations, etc.)</span></li>
+    </ul>
+    <div class="card-number">5</div>
+  </article>
+
+  <!-- 5 - ÉLECTRIQUE -->
+  <article class="card category-card" id="cat-electrique">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Électrique</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">A</span><span>vez-vous des pièces nues sous tension ? Si oui, que faites-vous pour maîtriser ce risque ? (P. ex. : câble électrique endommagé, etc.)</span></li>
+      <li><span class="q-letter">S</span><span>i vous devez intervenir sur votre équipement (p. ex. : démontage d'une partie sous tension), que faut-il faire au préalable ? (P. ex. : consignation électrique de l'équipement)</span></li>
+      <li><span class="q-letter">D</span><span>isposez-vous d'une habilitation électrique et pour quelle activité ?</span></li>
+      <li><span class="q-letter">C</span><span>omment vérifiez-vous que votre équipement est correctement consigné électriquement ?</span></li>
+    </ul>
+    <div class="card-number">6</div>
+  </article>
+
+  <!-- 6 - ESP -->
+  <article class="card category-card" id="cat-esp">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">ESP (Équipements Sous Pression)</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">S</span><span>i vous avez des équipements sous pression, quels dispositifs de sécurité existent ? (P. ex. : soupape, disque de rupture, limiteurs de débit en amont des compteurs à gaz, etc.)</span></li>
+      <li><span class="q-letter">L</span><span>'équipement est-il à jour de ses contrôles (inspections, épreuves, requalifications) ?</span></li>
+      <li><span class="q-letter">L</span><span>e groupe auquel appartient votre ESP est-il compatible avec les produits utilisés ? (P. ex. : groupe 1 pour produits dangereux, groupe 2 pour produits non dangereux)</span></li>
+      <li><span class="q-letter">C</span><span>omment vous assurez-vous que l'équipement est bien dépressurisé avant tout démontage ?</span></li>
+      <li><span class="q-letter">C</span><span>omment prévenez-vous les risques de coup de fouet par un flexible de gaz ? (P. ex. : câble anti-fouet)</span></li>
+    </ul>
+    <div class="card-number">7</div>
+  </article>
+
+  <!-- 7 - INCENDIE -->
+  <article class="card category-card" id="cat-incendie">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Incendie</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">Q</span><span>u'est-ce qui peut générer un risque d'incendie dans votre activité ? (P. ex. : point chaud à proximité de matériaux inflammables/combustibles)</span></li>
+      <li><span class="q-letter">C</span><span>omment limitez-vous la présence de produits inflammables/combustibles ? (P. ex. : évacuation des bouteilles de gaz non utilisées des locaux, stockage des liquides inflammables en armoires coupe-feu, élimination des cartons)</span></li>
+      <li><span class="q-letter">Q</span><span>uels sont vos réflexes en cas de départ d'incendie sur votre équipement ou installation ?</span></li>
+    </ul>
+    <div class="card-number">8</div>
+  </article>
+
+  <!-- 8 - MANUTENTION -->
+  <article class="card category-card" id="cat-manutention">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Manutention d'objets ou d'équipements lourds</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">L</span><span>es bouteilles de gaz (B50/B10/B20, etc.) sont-elles systématiquement attachées ?</span></li>
+      <li><span class="q-letter">C</span><span>omment déplacez-vous un équipement lourd (&gt; 50 kg) pour éviter tout risque d'écrasement ?</span></li>
+      <li><span class="q-letter">V</span><span>os équipements de levage sont-ils à jour de leur contrôle ? (P. ex. : palan, élingue, pont roulant, chèvre d'atelier)</span></li>
+      <li><span class="q-letter">C</span><span>es équipements de levage sont-ils compatibles avec les charges soulevées ?</span></li>
+    </ul>
+    <div class="card-number">9</div>
+  </article>
+
+  <!-- 10 - EPC ET EPI -->
+  <article class="card category-card" id="cat-epcepi">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">EPC et EPI</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">Q</span><span>uels équipements de protection collective (EPC) sont utilisés, comment fonctionnent-ils et comment vérifiez-vous leur bon fonctionnement ? (P. ex. : bon fonctionnement des extractions d'ambiance générale ou spécifique telles que cobra)</span></li>
+      <li><span class="q-letter">L</span><span>es sorbonnes sont-elles débarrassées des flacons et divers contenants en fin de journée ?</span></li>
+      <li><span class="q-letter">Q</span><span>uels sont les équipements de protection individuelle (EPI) adaptés pour cette activité ?</span></li>
+    </ul>
+    <div class="card-number">10</div>
+  </article>
+
+  <!-- 11 - ERGONOMIE -->
+  <article class="card category-card" id="cat-ergonomie">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Ergonomie</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">Q</span><span>uelles contraintes physiques rencontrez-vous sur ce poste ?</span></li>
+      <li><span class="q-letter">Q</span><span>u'est-ce qui pourrait être amélioré sur votre poste en termes de santé et de sécurité ?</span></li>
+    </ul>
+    <div class="card-number">11</div>
+  </article>
+
+  <!-- 12 - URGENCE -->
+  <article class="card category-card" id="cat-urgence">
+    <span class="corner corner-tl"></span><span class="corner corner-tr"></span>
+    <span class="corner corner-bl"></span><span class="corner corner-br"></span>
+    <div class="card-head"><span class="badge">Gestion des situations d'urgence</span></div>
+    <ul class="question-list">
+      <li><span class="q-letter">Q</span><span>ue faites-vous en cas d'incident grave ? Qui appelez-vous, quelles sont les consignes et où sont-elles affichées ? (P. ex. : 112 sur téléphone fixe, présence d'un téléphone dans le local d'essai)</span></li>
+      <li><span class="q-letter">Q</span><span>uels sont les équipements d'urgence pour sécuriser votre installation ? Que se passe-t-il quand vous les activez ?</span></li>
+      <li><span class="q-letter">Q</span><span>uels moyens de secours sont disponibles à proximité ? Les avez-vous testés ? (P. ex. : localisation de la douche ou de la douchette de sécurité, etc.)</span></li>
+      <li><span class="q-letter">C</span><span>omment sont organisées les évacuations et où se trouve le point de rassemblement ?</span></li>
+      <li><span class="q-letter">Q</span><span>ue faites-vous en cas de dysfonctionnement de l'installation ?</span></li>
+    </ul>
+    <div class="card-number">12</div>
+  </article>
+
+  <footer>Guide interne</footer>
+</div>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const cards = Array.from(document.querySelectorAll('.category-card'));
+  const noResults = document.getElementById('noResults');
+
+  function normalize(str){
+    return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  }
+
+  document.querySelectorAll('.question-list li > span:last-child').forEach(question => {
+    question.innerHTML = question.innerHTML.replace(/(\(p\. ex\. : (?:[^()]|\([^()]*\))*\))/gi, '<strong>$1</strong>');
+  });
+
+  searchInput.addEventListener('input', () => {
+    const q = normalize(searchInput.value.trim());
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const items = card.querySelectorAll('.question-list li');
+      let matches = 0;
+      items.forEach(li => {
+        const isMatch = q === '' || normalize(li.textContent).includes(q);
+        li.style.display = isMatch ? '' : 'none';
+        if(isMatch) matches++;
+      });
+      const show = q === '' || matches > 0;
+      card.style.display = show ? '' : 'none';
+      if(show) visibleCount++;
+    });
+    noResults.style.display = (q !== '' && visibleCount === 0) ? 'block' : 'none';
+  });
+</script>
+</body>
+</html>
