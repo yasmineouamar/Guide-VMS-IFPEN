@@ -87,14 +87,16 @@
   .usage-note strong{color:var(--navy);}
 
   /* toolbar */
-  .search-wrap{
+  .toolbar-wrap{
     position:sticky;top:0;z-index:20;
     background:var(--page-bg);
-    padding:12px 0 10px;
+    padding:0;
+    width:calc(100% + 24px);
+    margin-left:-12px;
   }
-  .toolbar-wrap{
+  .search-wrap{
     background:var(--page-bg);
-    padding:0 0 14px;
+    padding:10px 0;
   }
   .search-input{
     width:100%;padding:12px 16px;border-radius:14px;
@@ -103,12 +105,14 @@
     background:#fff;margin-bottom:10px;
   }
   .search-input:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px rgba(158,193,122,.3);}
-  .chip-nav{display:flex;flex-wrap:wrap;gap:8px;overflow:visible;padding-bottom:2px;}
-  .chip-nav{scrollbar-width:none;-ms-overflow-style:none;}
+  .chip-bar{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;gap:8px;width:100%;}
+  .chip-nav{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;padding:2px 0;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-x;}
   .chip-nav::-webkit-scrollbar{display:none;}
+  .chip-arrow{width:48px;height:48px;border:0;border-radius:8px;background:var(--sage);color:#fff;font-size:26px;font-weight:700;line-height:1;cursor:pointer;}
+  .chip-arrow:hover{background:var(--sage-dark);}
   .chip{
     flex-shrink:0;background:var(--cream);color:var(--navy);
-    border-radius:999px;padding:8px 16px;font-size:13.5px;font-weight:600;
+    border-radius:999px;padding:10px 18px;font-size:14px;font-weight:600;
     white-space:nowrap;text-decoration:none;
   }
   .chip:hover{background:var(--sage);color:#fff;}
@@ -141,6 +145,8 @@
     .card{padding:36px 20px 44px;}
     .hero-concepts{gap:20px 28px;}
     .hero .logo{width:128px;height:76px;}
+    .toolbar-wrap{width:100vw;margin-left:calc(50% - 50vw);padding-left:4px;padding-right:4px;}
+    .chip-bar{width:calc(100% + 8px);margin-left:-4px;}
   }
 
   @media print{
@@ -206,8 +212,11 @@
     <input type="text" id="searchInput" class="search-input" placeholder="Rechercher une question (ex. ATEX, EPI, incendie...)">
   </div>
   <div class="toolbar-wrap">
-    <nav class="chip-nav">
+    <div class="chip-bar">
+      <button class="chip-arrow" type="button" id="chipPrevious" aria-label="Catégorie précédente">&lt;</button>
+      <nav class="chip-nav" id="chipNav">
       <a class="chip" href="#cat-poste">Poste</a>
+      <a class="chip" href="#cat-procedures">Procédures</a>
       <a class="chip" href="#cat-risques">Risques</a>
       <a class="chip" href="#cat-atex">ATEX</a>
       <a class="chip" href="#cat-chimie">Chimie</a>
@@ -215,11 +224,12 @@
       <a class="chip" href="#cat-esp">ESP</a>
       <a class="chip" href="#cat-incendie">Incendie</a>
       <a class="chip" href="#cat-manutention">Manutention</a>
-      <a class="chip" href="#cat-procedures">Procédures</a>
       <a class="chip" href="#cat-epcepi">EPC / EPI</a>
       <a class="chip" href="#cat-ergonomie">Ergonomie</a>
       <a class="chip" href="#cat-urgence">Urgence</a>
-    </nav>
+      </nav>
+      <button class="chip-arrow" type="button" id="chipNext" aria-label="Catégorie suivante">&gt;</button>
+    </div>
   </div>
   <p class="no-results" id="noResults">Aucune question ne correspond à cette recherche.</p>
 
@@ -257,12 +267,12 @@
     <span class="corner corner-bl"></span><span class="corner corner-br"></span>
     <div class="card-head"><span class="badge">Risques identifiés</span></div>
     <div class="hazard-row">
-      <div class="hazard"><img src="RISQUE ATEX-jaune.png" alt="Risque ATEX"></div>
-      <div class="hazard"><img src="Risque toxique-jaune.png" alt="Risque toxique"></div>
-      <div class="hazard"><img src="Risque électrique -jaune.png" alt="Risque électrique"></div>
-      <div class="hazard"><img src="ESP_CORRECT-removebg-preview-jaune.png" alt="Risque lié aux équipements sous pression"></div>
-      <div class="hazard"><img src="Risque inflammable-jaune.png" alt="Risque inflammable"></div>
-      <div class="hazard"><img src="charge_lourdes-removebg-preview-jaune.png" alt="Risque lié aux charges lourdes"></div>
+      <div class="hazard"><img src="pictogrammes/RISQUE ATEX-jaune.png" alt="Risque ATEX"></div>
+      <div class="hazard"><img src="pictogrammes/Risque toxique-jaune.png" alt="Risque toxique"></div>
+      <div class="hazard"><img src="pictogrammes/Risque électrique -jaune.png" alt="Risque électrique"></div>
+      <div class="hazard"><img src="pictogrammes/ESP_CORRECT-removebg-preview-jaune.png" alt="Risque lié aux équipements sous pression"></div>
+      <div class="hazard"><img src="pictogrammes/Risque inflammable-jaune.png" alt="Risque inflammable"></div>
+      <div class="hazard"><img src="pictogrammes/charge_lourdes-removebg-preview-jaune.png" alt="Risque lié aux charges lourdes"></div>
     </div>
     <ul class="question-list">
       <li><span class="q-letter">Q</span><span>uels sont les principaux risques sur ce poste et comment sont-ils maîtrisés ?</span></li>
@@ -416,23 +426,32 @@
     question.innerHTML = question.innerHTML.replace(/(\(p\. ex\. : (?:[^()]|\([^()]*\))*\))/gi, '<strong>$1</strong>');
   });
 
+  const chipNav = document.getElementById('chipNav');
+  document.getElementById('chipPrevious').addEventListener('click', () => {
+    chipNav.scrollBy({left: -180, behavior: 'smooth'});
+  });
+  document.getElementById('chipNext').addEventListener('click', () => {
+    chipNav.scrollBy({left: 180, behavior: 'smooth'});
+  });
+
   searchInput.addEventListener('input', () => {
-    const q = normalize(searchInput.value.trim());
+    const query = normalize(searchInput.value.trim());
     let visibleCount = 0;
     cards.forEach(card => {
       const items = card.querySelectorAll('.question-list li');
       let matches = 0;
-      items.forEach(li => {
-        const isMatch = q === '' || normalize(li.textContent).includes(q);
-        li.style.display = isMatch ? '' : 'none';
+      items.forEach(item => {
+        const isMatch = query === '' || normalize(item.textContent).includes(query);
+        item.style.display = isMatch ? '' : 'none';
         if(isMatch) matches++;
       });
-      const show = q === '' || matches > 0;
+      const show = query === '' || matches > 0;
       card.style.display = show ? '' : 'none';
       if(show) visibleCount++;
     });
-    noResults.style.display = (q !== '' && visibleCount === 0) ? 'block' : 'none';
+    noResults.style.display = (query !== '' && visibleCount === 0) ? 'block' : 'none';
   });
 </script>
 </body>
 </html>
+
